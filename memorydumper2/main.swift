@@ -156,14 +156,6 @@ struct Memory {
         return buffer.withUnsafeBufferPointer({ bufferPointer in
             let castBufferPointer = UnsafeBufferPointer(start: UnsafePointer<Pointer?>(bufferPointer.baseAddress), count: bufferPointer.count / sizeof(Pointer.self))
             return castBufferPointer.enumerated().map({ PointerAndOffset(pointer: $1, offset: $0 * sizeof(Pointer.self)) })
-            let pointerPointer = UnsafePointer<Pointer>(bufferPointer.baseAddress)
-            let pointerCount = bufferPointer.count / sizeof(Pointer.self)
-            var result: [PointerAndOffset] = []
-            for i in 0..<pointerCount {
-                let val = PointerAndOffset(pointer: UnsafePointer(bitPattern: 0xdeadbeef)!, offset: i * sizeof(Pointer.self))
-                result.append(val)
-            }
-            return result
         })
     }
 }
