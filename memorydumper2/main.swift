@@ -24,7 +24,7 @@ func nextSymbol(ptr: Pointer, limit: Int) -> Pointer? {
     if let info = symbolInfo(ptr) {
         for i in 1..<limit {
             let candidate = ptr + i
-            guard let candidateInfo = symbolInfo(ptr) else { return nil }
+            guard let candidateInfo = symbolInfo(candidate) else { return nil }
             if info.dli_saddr != candidateInfo.dli_saddr {
                 return candidate
             }
