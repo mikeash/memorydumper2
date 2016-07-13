@@ -2,12 +2,53 @@
 import AppKit
 
 
-typealias Pointer = UnsafePointer<Void>
+struct Pointer {
+    var address: UInt
+    
+    init(_ address: UInt) {
+        self.address = address
+    }
+    
+    init<T>(_ ptr: UnsafePointer<T>) {
+        address = UInt(bitPattern: ptr)
+    }
+    
+    init<T>(_ ptr: UnsafeMutablePointer<T>) {
+        address = UInt(bitPattern: ptr)
+    }
+    
+    var voidPtr: UnsafePointer<Void>? {
+        return UnsafePointer(bitPattern: address)
+    }
+}
 
+extension Pointer: CustomStringConvertible {
+    var description: String {
+        return String(format: "%p", address)
+    }
+}
+
+extension Pointer: Hashable {
+    var hashValue: Int {
+        return address.hashValue
+    }
+}
+
+func ==(lhs: Pointer, rhs: Pointer) -> Bool {
+    return lhs.address == rhs.address
+}
+
+func +(lhs: Pointer, rhs: UInt) -> Pointer {
+    return Pointer(lhs.address + rhs)
+}
+
+func -(lhs: Pointer, rhs: Pointer) -> UInt {
+    return lhs.address - rhs.address
+}
 
 func symbolInfo(_ ptr: Pointer) -> Dl_info? {
     var info = Dl_info()
-    let result = dladdr(ptr, &info)
+    let result = dladdr(ptr.voidPtr, &info)
     return result == 0 ? nil : info
 }
 
@@ -20,7 +61,7 @@ func symbolName(_ ptr: Pointer) -> String? {
     return nil
 }
 
-func nextSymbol(ptr: Pointer, limit: Int) -> Pointer? {
+func nextSymbol(ptr: Pointer, limit: UInt) -> Pointer? {
     if let info = symbolInfo(ptr) {
         for i in 1..<limit {
             let candidate = ptr + i
@@ -33,13 +74,17 @@ func nextSymbol(ptr: Pointer, limit: Int) -> Pointer? {
     return nil
 }
 
-func symbolLength(ptr: Pointer, limit: Int) -> Int? {
+func symbolLength(ptr: Pointer, limit: UInt) -> UInt? {
     return nextSymbol(ptr: ptr, limit: limit).map({ $0 - ptr })
 }
 
 extension mach_vm_address_t {
-    init(_ ptr: Pointer?) {
+    init(_ ptr: UnsafePointer<Void>?) {
         self.init(UInt(bitPattern: ptr))
+    }
+    
+    init(_ ptr: Pointer) {
+        self.init(ptr.address)
     }
 }
 
@@ -60,7 +105,7 @@ func safeRead(ptr: Pointer, limit: Int) -> [UInt8] {
     var buffer: [UInt8] = []
     var eightBytes: [UInt8] = Array(repeating: 0, count: 8)
     while buffer.count < limit {
-        let success = safeRead(ptr: ptr + buffer.count, into: &eightBytes)
+        let success = safeRead(ptr: ptr + UInt(buffer.count), into: &eightBytes)
         if !success {
             break
         }
@@ -116,7 +161,7 @@ func objcInstanceClassName(ptr: Pointer) -> String? {
 }
 
 struct PointerAndOffset {
-    var pointer: Pointer?
+    var pointer: Pointer
     var offset: Int
 }
 
@@ -130,9 +175,8 @@ struct Memory {
         self.isMalloc = false
     }
     
-    init?(ptr: Pointer?, knownSize: Int? = nil) {
-        guard let ptr = ptr else { return nil }
-        let mallocLength = malloc_size(ptr)
+    init?(ptr: Pointer, knownSize: UInt? = nil) {
+        let mallocLength = UInt(malloc_size(ptr.voidPtr))
         
         isMalloc = mallocLength > 0
         symbolName = symbolInfo(ptr).flatMap({
@@ -145,7 +189,7 @@ struct Memory {
         
         let length = knownSize ?? symbolLength(ptr: ptr, limit: 4096) ?? mallocLength
         if length > 0 {
-            buffer = Array(repeating: 0, count: length)
+            buffer = Array(repeating: 0, count: Int(length))
             let success = safeRead(ptr: ptr, into: &buffer)
             if !success {
                 return nil
@@ -160,7 +204,7 @@ struct Memory {
     
     func scanPointers() -> [PointerAndOffset] {
         return buffer.withUnsafeBufferPointer({ bufferPointer in
-            let castBufferPointer = UnsafeBufferPointer(start: UnsafePointer<Pointer?>(bufferPointer.baseAddress), count: bufferPointer.count / sizeof(Pointer.self))
+            let castBufferPointer = UnsafeBufferPointer(start: UnsafePointer<Pointer>(bufferPointer.baseAddress), count: bufferPointer.count / sizeof(Pointer.self))
             return castBufferPointer.enumerated().map({ PointerAndOffset(pointer: $1, offset: $0 * sizeof(Pointer.self)) })
         })
     }
@@ -207,8 +251,8 @@ func ==(lhs: MemoryRegion, rhs: MemoryRegion) -> Bool {
 func buildMemoryRegionTree<T>(value: T, maxDepth: Int) -> [MemoryRegion] {
     var value = value
     let maybeRootRegion = withUnsafePointer(&value, { ptr -> MemoryRegion? in
-        let memory = Memory(ptr: ptr, knownSize: sizeof(T.self))
-        return memory.map({ MemoryRegion(depth: 1, pointer: ptr, memory: $0) })
+        let memory = Memory(ptr: Pointer(ptr), knownSize: UInt(sizeof(T.self)))
+        return memory.map({ MemoryRegion(depth: 1, pointer: Pointer(ptr), memory: $0) })
     })
     guard let rootRegion = maybeRootRegion else { return [] }
     
@@ -220,17 +264,16 @@ func buildMemoryRegionTree<T>(value: T, maxDepth: Int) -> [MemoryRegion] {
         
         let childPointers = region.memory.scanPointers()
         for pointerAndOffset in childPointers {
-            if let pointer = pointerAndOffset.pointer {
-                if let existingRegion = allRegions[pointer] {
-                    existingRegion.depth = min(existingRegion.depth, region.depth + 1)
-                    region.children.append(.init(offset: pointerAndOffset.offset, region: existingRegion))
-                    toScan.insert(existingRegion)
-                } else if let memory = Memory(ptr: pointer) {
-                    let childRegion = MemoryRegion(depth: region.depth + 1, pointer: pointer, memory: memory)
-                    allRegions[pointer] = childRegion
-                    region.children.append(.init(offset: pointerAndOffset.offset, region: childRegion))
-                    toScan.insert(childRegion)
-                }
+            let pointer = pointerAndOffset.pointer
+            if let existingRegion = allRegions[pointer] {
+                existingRegion.depth = min(existingRegion.depth, region.depth + 1)
+                region.children.append(.init(offset: pointerAndOffset.offset, region: existingRegion))
+                toScan.insert(existingRegion)
+            } else if let memory = Memory(ptr: pointer) {
+                let childRegion = MemoryRegion(depth: region.depth + 1, pointer: pointer, memory: memory)
+                allRegions[pointer] = childRegion
+                region.children.append(.init(offset: pointerAndOffset.offset, region: childRegion))
+                toScan.insert(childRegion)
             }
         }
         region.didScan = true
