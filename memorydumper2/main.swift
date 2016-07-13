@@ -215,7 +215,9 @@ func buildMemoryRegionTree<T>(value: T, maxDepth: Int) -> [MemoryRegion] {
     var allRegions: [Pointer: MemoryRegion] = [rootRegion.pointer: rootRegion]
     
     var toScan: Set = [rootRegion]
-    while let region = toScan.popFirst() where !region.didScan && region.depth < maxDepth {
+    while let region = toScan.popFirst() {
+        if region.didScan || region.depth >= maxDepth { continue }
+        
         let childPointers = region.memory.scanPointers()
         let childMemories = childPointers.flatMap({ pointerAndOffset -> (PointerAndOffset, Memory)? in
             let memory = Memory(ptr: pointerAndOffset.pointer)
