@@ -158,6 +158,15 @@ struct Memory {
             return castBufferPointer.enumerated().map({ PointerAndOffset(pointer: $1, offset: $0 * sizeof(Pointer.self)) })
         })
     }
+    
+    func scanStrings() -> [String] {
+        let lowerBound: UInt8 = 32
+        let upperBound: UInt8 = 126
+        
+        let pieces = buffer.split(isSeparator: { !(lowerBound ... upperBound ~= $0) })
+        let sufficientlyLongPieces = pieces.filter({ $0.count >= 4 })
+        return sufficientlyLongPieces.map({ String(bytes: $0, encoding: .utf8)! })
+    }
 }
 
 class MemoryRegion {
@@ -255,8 +264,20 @@ func dumpAndOpenGraph<T>(_ value: T) {
         } else {
             labelName = "unknown"
         }
-        let label = "\(labelName) \(region.pointer) (\(region.memory.buffer.count) bytes)\n\(memoryString)"
-        line("\(graphvizNodeName(region: region)) [label=\"\(label)\"]")
+        
+        var label = "\(labelName) \(region.pointer) (\(region.memory.buffer.count) bytes)\n\(memoryString)"
+        
+        let strings = region.memory.scanStrings()
+        if strings.count > 0 {
+            label += "\nStrings:\n"
+            label += strings.joined(separator: "\n")
+        }
+        
+        let escaped = label
+            .replacingOccurrences(of: "\\", with: "\\\\")
+            .replacingOccurrences(of: "\"", with: "\\\"")
+        
+        line("\(graphvizNodeName(region: region)) [label=\"\(escaped)\"]")
         
         for child in region.children {
             line("\(graphvizNodeName(region: region)) -> \(graphvizNodeName(region: child.region)) [label=\"@\(child.offset)\"]")
