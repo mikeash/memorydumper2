@@ -104,6 +104,17 @@ func objcClassName(ptr: Pointer) -> String? {
     return Static.classMap[ptr].map({ NSStringFromClass($0) })
 }
 
+func objcInstanceClassName(ptr: Pointer) -> String? {
+    let isaBytes = safeRead(ptr: ptr, limit: sizeof(Pointer.self))
+    guard isaBytes.count >= sizeof(Pointer.self) else { return nil }
+    
+    let isa = isaBytes.withUnsafeBufferPointer({ buffer -> Pointer in
+        let pointerPointer = UnsafePointer<Pointer>(buffer.baseAddress)!
+        return pointerPointer.pointee
+    })
+    return objcClassName(ptr: isa)
+}
+
 struct PointerAndOffset {
     var pointer: Pointer?
     var offset: Int
@@ -243,6 +254,8 @@ func dumpAndOpenGraph<T>(_ value: T) {
         let labelName: String
         if let className = objcClassName(ptr: region.pointer) {
             labelName = "ObjC class \(className)"
+        } else if let className = objcInstanceClassName(ptr: region.pointer) {
+            labelName = "Instance of \(className)"
         } else if let symbolName = region.memory.symbolName {
             labelName = symbolName
         } else if region.memory.isMalloc {
