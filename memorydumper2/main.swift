@@ -124,7 +124,6 @@ struct Memory {
     
     func scanPointers() -> [PointerAndOffset] {
         return buffer.withUnsafeBufferPointer({ bufferPointer in
-            print(bufferPointer)
             let castBufferPointer = UnsafeBufferPointer(start: UnsafePointer<Pointer?>(bufferPointer.baseAddress), count: bufferPointer.count / sizeof(Pointer.self))
             return castBufferPointer.enumerated().map({ PointerAndOffset(pointer: $1, offset: $0 * sizeof(Pointer.self)) })
             let pointerPointer = UnsafePointer<Pointer>(bufferPointer.baseAddress)
@@ -205,22 +204,6 @@ func buildMemoryRegionTree<T>(value: T, maxDepth: Int) -> [MemoryRegion] {
     return Array(allRegions.values)
 }
 
-func read<T>(_ value: T) {
-    var value = value
-    withUnsafePointer(&value, { ptr in
-        if let mem = Memory(ptr: ptr, knownSize: sizeofValue(value)) {
-            print(hexString(bytes: mem.buffer))
-            let ps = mem.scanPointers()
-            print(ps)
-            print(ps.count)
-            print(ps[2])
-        }
-        if let mem = Memory(ptr: ptr) {
-            print(hexString(bytes: mem.buffer))
-        }
-    })
-}
-
 func dumpAndOpenGraph<T>(_ value: T) {
     var result = ""
     func line(_ string: String) {
@@ -269,18 +252,7 @@ class D {}
 
 func main() {
     let c = C()
-    print(unsafeAddress(of: c))
-    let mem2 = Memory(ptr: unsafeAddress(of: c))!
-    let pointers2 = mem2.scanPointers()
-    print(pointers2)
-    let mem = Memory(buffer: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16])
-    let pointers = mem.scanPointers()
-    print(pointers)
-    print(Data(bytes: UnsafePointer(unsafeAddress(of: c)), count: malloc_size(unsafeAddress(of: c))))
-    print(unsafeAddress(of: c.z))
     dumpAndOpenGraph(c)
-    print(Data(bytes: UnsafePointer(unsafeAddress(of: c)), count: malloc_size(unsafeAddress(of: c))))
-    print(unsafeAddress(of: c.z))
 }
 
 main()
