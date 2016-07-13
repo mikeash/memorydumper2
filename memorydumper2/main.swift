@@ -255,27 +255,8 @@ func dumpAndOpenGraph<T>(_ value: T) {
     }
     line("}")
     
-    let task = Task()
-    task.launchPath = "/opt/local/bin/dot"
-    task.arguments = ["-Tpdf"]
-    
-    let inPipe = Pipe()
-    task.standardInput = inPipe
-    
-    let outPipe = Pipe()
-    task.standardOutput = outPipe
-    
-    task.launch()
-    
-    DispatchQueue.global().async(execute: {
-        let fh = inPipe.fileHandleForWriting
-        fh.write(result.data(using: .utf8)!)
-        fh.closeFile()
-    })
-    
-    let outData = outPipe.fileHandleForReading.readDataToEndOfFile()
-    try! outData.write(to: URL(fileURLWithPath: "/tmp/memorydump.pdf"))
-    NSWorkspace.shared().openFile("/tmp/memorydump.pdf")
+    try! result.write(toFile: "/tmp/memorydump.dot", atomically: false, encoding: .utf8)
+    NSWorkspace.shared().openFile("/tmp/memorydump.dot", withApplication: "Graphviz")
 }
 
 class C: NSObject {
