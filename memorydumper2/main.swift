@@ -135,7 +135,13 @@ struct Memory {
         let mallocLength = malloc_size(ptr)
         
         isMalloc = mallocLength > 0
-        symbolName = symbolInfo(ptr).flatMap({ String(cString: $0.dli_sname) })
+        symbolName = symbolInfo(ptr).flatMap({
+            if let name = $0.dli_sname {
+                return String(cString: name)
+            } else {
+                return nil
+            }
+        })
         
         let length = knownSize ?? symbolLength(ptr: ptr, limit: 4096) ?? mallocLength
         if length > 0 {
