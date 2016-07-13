@@ -85,6 +85,25 @@ func hexString<Seq: Sequence where Seq.Iterator.Element == UInt8>(bytes: Seq, li
     return result
 }
 
+func objcClassName(ptr: Pointer) -> String? {
+    struct Static {
+        static let classMap: [Pointer: AnyClass] = {
+            var classCount: UInt32 = 0
+            let list = objc_copyClassList(&classCount)!
+            
+            var map: [Pointer: AnyClass] = [:]
+            for i in 0 ..< classCount {
+                let classObj: AnyClass = list[Int(i)]!
+                let classPtr = unsafeBitCast(classObj, to: Pointer.self)
+                map[classPtr] = classObj
+            }
+            return map
+        }()
+    }
+    
+    return Static.classMap[ptr].map({ NSStringFromClass($0) })
+}
+
 struct PointerAndOffset {
     var pointer: Pointer?
     var offset: Int
@@ -222,7 +241,9 @@ func dumpAndOpenGraph<T>(_ value: T) {
     for region in regions {
         let memoryString = hexString(bytes: region.memory.buffer, limit: 32, separator: "\n")
         let labelName: String
-        if let symbolName = region.memory.symbolName {
+        if let className = objcClassName(ptr: region.pointer) {
+            labelName = "ObjC class \(className)"
+        } else if let symbolName = region.memory.symbolName {
             labelName = symbolName
         } else if region.memory.isMalloc {
             labelName = "malloc"
