@@ -219,23 +219,19 @@ func buildMemoryRegionTree<T>(value: T, maxDepth: Int) -> [MemoryRegion] {
         if region.didScan || region.depth >= maxDepth { continue }
         
         let childPointers = region.memory.scanPointers()
-        let childMemories = childPointers.flatMap({ pointerAndOffset -> (PointerAndOffset, Memory)? in
-            let memory = Memory(ptr: pointerAndOffset.pointer)
-            return memory.map({ (pointerAndOffset, $0) })
-        })
-        let childRegions = childMemories.map({
-            return ($0.0.offset, MemoryRegion(depth: region.depth + 1, pointer: $0.0.pointer!, memory: $0.1))
-        })
-        for (offset, childRegion) in childRegions {
-            let canonicalChild: MemoryRegion
-            if let r = allRegions[childRegion.pointer] {
-                canonicalChild = r
-            } else {
-                canonicalChild = childRegion
-                allRegions[childRegion.pointer] = canonicalChild
+        for pointerAndOffset in childPointers {
+            if let pointer = pointerAndOffset.pointer {
+                if let existingRegion = allRegions[pointer] {
+                    existingRegion.depth = min(existingRegion.depth, region.depth + 1)
+                    region.children.append(.init(offset: pointerAndOffset.offset, region: existingRegion))
+                    toScan.insert(existingRegion)
+                } else if let memory = Memory(ptr: pointer) {
+                    let childRegion = MemoryRegion(depth: region.depth + 1, pointer: pointer, memory: memory)
+                    allRegions[pointer] = childRegion
+                    region.children.append(.init(offset: pointerAndOffset.offset, region: childRegion))
+                    toScan.insert(childRegion)
+                }
             }
-            region.children.append(.init(offset: offset, region: canonicalChild))
-            toScan.insert(canonicalChild)
         }
         region.didScan = true
     }
