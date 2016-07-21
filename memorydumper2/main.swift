@@ -54,7 +54,7 @@ func symbolInfo(_ ptr: Pointer) -> Dl_info? {
 
 func symbolName(_ ptr: Pointer) -> String? {
     if let info = symbolInfo(ptr) {
-        if let symbolAddr = info.dli_saddr where Pointer(symbolAddr) == ptr {
+        if let symbolAddr = info.dli_saddr, Pointer(symbolAddr) == ptr {
             return String(cString: info.dli_sname)
         }
     }
@@ -118,7 +118,7 @@ func hexString<Seq: Sequence where Seq.Iterator.Element == UInt8>(bytes: Seq, li
     let spacesInterval = 8
     var result = ""
     for (index, byte) in bytes.enumerated() {
-        if let limit = limit where index >= limit {
+        if let limit = limit, index >= limit {
             result.append("...")
             break
         }
