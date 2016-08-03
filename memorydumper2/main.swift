@@ -337,6 +337,10 @@ func dumpAndOpenGraph<T>(dumping value: T, maxDepth: Int, filename: String) {
     NSWorkspace.shared().openFile(path, withApplication: "Graphviz")
 }
 
+protocol P {
+    func f()
+}
+
 func main() {
     struct EmptyStruct {}
     dumpAndOpenGraph(dumping: EmptyStruct(), maxDepth: 60, filename: "EmptyStruct")
@@ -376,6 +380,28 @@ func main() {
         var d = 4
     }
     dumpAndOpenGraph(dumping: DeepClass(), maxDepth: 60, filename: "DeepClass")
+    
+    dumpAndOpenGraph(dumping: [1, 2, 3, 4, 5], maxDepth: 4, filename: "IntegerArray")
+    
+    struct StructSmallP: P {
+        func f() {}
+        var a = 0x6c6c616d73
+    }
+    struct StructBigP: P {
+        func f() {}
+        var a = 0x746375727473
+        var b = 0x1010101010101010
+        var c = 0x2020202020202020
+        var d = 0x3030303030303030
+    }
+    struct ClassP: P {
+        func f() {}
+        var a = 0x7373616c63
+        var b = 0x4040404040404040
+        var c = 0x5050505050505050
+        var d = 0x6060606060606060
+    }
+    dumpAndOpenGraph(dumping: [StructSmallP(), StructBigP(), ClassP()] as [P], maxDepth: 4, filename: "ProtocolConformance")
 }
 
 main()
