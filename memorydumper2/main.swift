@@ -298,7 +298,7 @@ func dumpAndOpenGraph<T>(dumping value: T, maxDepth: Int, filename: String) {
     
     line("digraph memory_dump_graph {")
     for region in regions {
-        let memoryString = hexString(bytes: region.memory.buffer, limit: 32, separator: "\n")
+        let memoryString = hexString(bytes: region.memory.buffer, limit: 64, separator: "\n")
         let labelName: String
         if let className = objcClassName(ptr: region.pointer) {
             labelName = "ObjC class \(className)"
