@@ -282,7 +282,7 @@ func buildMemoryRegionTree<T>(value: T, maxDepth: Int) -> [MemoryRegion] {
     return Array(allRegions.values)
 }
 
-func dumpAndOpenGraph<T>(_ value: T) {
+func dumpAndOpenGraph<T>(dumping value: T, maxDepth: Int, filename: String) {
     var result = ""
     func line(_ string: String) {
         result += string
@@ -294,7 +294,7 @@ func dumpAndOpenGraph<T>(_ value: T) {
         return "_" + s.substring(from: s.index(s.startIndex, offsetBy: 2))
     }
     
-    let regions = buildMemoryRegionTree(value: value, maxDepth: 4)
+    let regions = buildMemoryRegionTree(value: value, maxDepth: maxDepth)
     
     line("digraph memory_dump_graph {")
     for region in regions {
@@ -332,8 +332,9 @@ func dumpAndOpenGraph<T>(_ value: T) {
     }
     line("}")
     
-    try! result.write(toFile: "/tmp/memorydump.dot", atomically: false, encoding: .utf8)
-    NSWorkspace.shared().openFile("/tmp/memorydump.dot", withApplication: "Graphviz")
+    let path = "/tmp/\(filename).dot"
+    try! result.write(toFile: path, atomically: false, encoding: .utf8)
+    NSWorkspace.shared().openFile(path, withApplication: "Graphviz")
 }
 
 class C: NSObject {
@@ -342,11 +343,11 @@ class C: NSObject {
     let y = "hello"
 }
 
-class D {}
+class D: NSObject {}
 
 func main() {
     let c = C()
-    dumpAndOpenGraph(c)
+    dumpAndOpenGraph(dumping: c, maxDepth: 60, filename: "whatever")
 }
 
 main()
