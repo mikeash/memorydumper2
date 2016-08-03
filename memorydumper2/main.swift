@@ -213,7 +213,7 @@ struct Memory {
         let lowerBound: UInt8 = 32
         let upperBound: UInt8 = 126
         
-        let pieces = buffer.split(isSeparator: { !(lowerBound ... upperBound ~= $0) })
+        let pieces = buffer.split(whereSeparator: { !(lowerBound ... upperBound ~= $0) })
         let sufficientlyLongPieces = pieces.filter({ $0.count >= 4 })
         return sufficientlyLongPieces.map({ String(bytes: $0, encoding: .utf8)! })
     }
