@@ -32,18 +32,18 @@ extension Pointer: Hashable {
     var hashValue: Int {
         return address.hashValue
     }
-}
-
-func ==(lhs: Pointer, rhs: Pointer) -> Bool {
-    return lhs.address == rhs.address
-}
-
-func +(lhs: Pointer, rhs: UInt) -> Pointer {
-    return Pointer(lhs.address + rhs)
-}
-
-func -(lhs: Pointer, rhs: Pointer) -> UInt {
-    return lhs.address - rhs.address
+    
+    static func ==(lhs: Pointer, rhs: Pointer) -> Bool {
+        return lhs.address == rhs.address
+    }
+    
+    static func +(lhs: Pointer, rhs: UInt) -> Pointer {
+        return Pointer(lhs.address + rhs)
+    }
+    
+    static func -(lhs: Pointer, rhs: Pointer) -> UInt {
+        return lhs.address - rhs.address
+    }
 }
 
 func symbolInfo(_ ptr: Pointer) -> Dl_info? {
