@@ -346,6 +346,36 @@ func main() {
     
     class EmptyObjCClass: NSObject {}
     dumpAndOpenGraph(dumping: EmptyObjCClass(), maxDepth: 60, filename: "EmptyObjCClass")
+    
+    struct PrimitivesStruct {
+        var a: UInt8 = 10
+        var b: UInt32 = 11
+        var c: UInt16 = 12
+        var d: UInt64 = 13
+    }
+    dumpAndOpenGraph(dumping: PrimitivesStruct(), maxDepth: 60, filename: "PrimitivesStruct")
+    
+    class PrimitivesClass {
+        var a: UInt8 = 10
+        var b: UInt32 = 11
+        var c: UInt16 = 12
+        var d: UInt64 = 13
+    }
+    dumpAndOpenGraph(dumping: PrimitivesClass(), maxDepth: 60, filename: "PrimitivesClass")
+    
+    class DeepClassSuper1 {
+        var a = 1
+    }
+    class DeepClassSuper2: DeepClassSuper1 {
+        var b = 2
+    }
+    class DeepClassSuper3: DeepClassSuper2 {
+        var c = 3
+    }
+    class DeepClass: DeepClassSuper3 {
+        var d = 4
+    }
+    dumpAndOpenGraph(dumping: DeepClass(), maxDepth: 60, filename: "DeepClass")
 }
 
 main()
