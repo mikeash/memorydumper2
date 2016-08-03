@@ -337,17 +337,15 @@ func dumpAndOpenGraph<T>(dumping value: T, maxDepth: Int, filename: String) {
     NSWorkspace.shared().openFile(path, withApplication: "Graphviz")
 }
 
-class C: NSObject {
-    let z = D()
-    let x = 42
-    let y = "hello"
-}
-
-class D: NSObject {}
-
 func main() {
-    let c = C()
-    dumpAndOpenGraph(dumping: c, maxDepth: 60, filename: "whatever")
+    struct EmptyStruct {}
+    dumpAndOpenGraph(dumping: EmptyStruct(), maxDepth: 60, filename: "EmptyStruct")
+    
+    class EmptyClass {}
+    dumpAndOpenGraph(dumping: EmptyClass(), maxDepth: 60, filename: "EmptyClass")
+    
+    class EmptyObjCClass: NSObject {}
+    dumpAndOpenGraph(dumping: EmptyObjCClass(), maxDepth: 60, filename: "EmptyObjCClass")
 }
 
 main()
