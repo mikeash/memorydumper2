@@ -188,7 +188,7 @@ struct Memory {
         })
         
         let length = knownSize ?? symbolLength(ptr: ptr, limit: 4096) ?? mallocLength
-        if length > 0 {
+        if length > 0 || knownSize == 0 {
             buffer = Array(repeating: 0, count: Int(length))
             let success = safeRead(ptr: ptr, into: &buffer)
             if !success {
