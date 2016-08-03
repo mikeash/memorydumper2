@@ -78,6 +78,25 @@ func symbolLength(ptr: Pointer, limit: UInt) -> UInt? {
     return nextSymbol(ptr: ptr, limit: limit).map({ $0 - ptr })
 }
 
+func demangle(_ string: String) -> String {
+    let task = Task()
+    task.launchPath = "/usr/bin/xcrun"
+    task.arguments = ["swift-demangle"]
+    
+    let inPipe = Pipe()
+    let outPipe = Pipe()
+    task.standardInput = inPipe
+    task.standardOutput = outPipe
+    
+    task.launch()
+    DispatchQueue.global().async(execute: {
+        inPipe.fileHandleForWriting.write(string.data(using: .utf8)!)
+        inPipe.fileHandleForWriting.closeFile()
+    })
+    let data = outPipe.fileHandleForReading.readDataToEndOfFile()
+    return String(data: data, encoding: .utf8)!
+}
+
 extension mach_vm_address_t {
     init(_ ptr: UnsafePointer<Void>?) {
         self.init(UInt(bitPattern: ptr))
@@ -181,7 +200,7 @@ struct Memory {
         isMalloc = mallocLength > 0
         symbolName = symbolInfo(ptr).flatMap({
             if let name = $0.dli_sname {
-                return String(cString: name)
+                return demangle(String(cString: name))
             } else {
                 return nil
             }
