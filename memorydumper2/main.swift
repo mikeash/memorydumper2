@@ -9,16 +9,12 @@ struct Pointer {
         self.address = address
     }
     
-    init<T>(_ ptr: UnsafePointer<T>) {
+    init(_ ptr: UnsafeRawPointer) {
         address = UInt(bitPattern: ptr)
     }
     
-    init<T>(_ ptr: UnsafeMutablePointer<T>) {
-        address = UInt(bitPattern: ptr)
-    }
-    
-    var voidPtr: UnsafePointer<Void>? {
-        return UnsafePointer(bitPattern: address)
+    var voidPtr: UnsafeRawPointer? {
+        return UnsafeRawPointer(bitPattern: address)
     }
 }
 
@@ -79,7 +75,7 @@ func symbolLength(ptr: Pointer, limit: UInt) -> UInt? {
 }
 
 func demangle(_ string: String) -> String {
-    let task = Task()
+    let task = Process()
     task.launchPath = "/usr/bin/xcrun"
     task.arguments = ["swift-demangle"]
     
@@ -98,7 +94,7 @@ func demangle(_ string: String) -> String {
 }
 
 extension mach_vm_address_t {
-    init(_ ptr: UnsafePointer<Void>?) {
+    init(_ ptr: UnsafeRawPointer?) {
         self.init(UInt(bitPattern: ptr))
     }
     
@@ -133,7 +129,7 @@ func safeRead(ptr: Pointer, limit: Int) -> [UInt8] {
     return buffer
 }
 
-func hexString<Seq: Sequence where Seq.Iterator.Element == UInt8>(bytes: Seq, limit: Int? = nil, separator: String = " ") -> String {
+func hexString<Seq: Sequence>(bytes: Seq, limit: Int? = nil, separator: String = " ") -> String where Seq.Iterator.Element == UInt8 {
     let spacesInterval = 8
     var result = ""
     for (index, byte) in bytes.enumerated() {
@@ -169,12 +165,11 @@ func objcClassName(ptr: Pointer) -> String? {
 }
 
 func objcInstanceClassName(ptr: Pointer) -> String? {
-    let isaBytes = safeRead(ptr: ptr, limit: sizeof(Pointer.self))
-    guard isaBytes.count >= sizeof(Pointer.self) else { return nil }
+    let isaBytes = safeRead(ptr: ptr, limit: MemoryLayout<Pointer>.size)
+    guard isaBytes.count >= MemoryLayout<Pointer>.size else { return nil }
     
     let isa = isaBytes.withUnsafeBufferPointer({ buffer -> Pointer in
-        let pointerPointer = UnsafePointer<Pointer>(buffer.baseAddress)!
-        return pointerPointer.pointee
+        return buffer.baseAddress!.withMemoryRebound(to: Pointer.self, capacity: 1, { $0.pointee })
     })
     return objcClassName(ptr: isa)
 }
@@ -223,8 +218,10 @@ struct Memory {
     
     func scanPointers() -> [PointerAndOffset] {
         return buffer.withUnsafeBufferPointer({ bufferPointer in
-            let castBufferPointer = UnsafeBufferPointer(start: UnsafePointer<Pointer>(bufferPointer.baseAddress), count: bufferPointer.count / sizeof(Pointer.self))
-            return castBufferPointer.enumerated().map({ PointerAndOffset(pointer: $1, offset: $0 * sizeof(Pointer.self)) })
+            return bufferPointer.baseAddress?.withMemoryRebound(to: Pointer.self, capacity: bufferPointer.count / MemoryLayout<Pointer>.size, {
+                let castBufferPointer = UnsafeBufferPointer(start: $0, count: bufferPointer.count / MemoryLayout<Pointer>.size)
+                return castBufferPointer.enumerated().map({ PointerAndOffset(pointer: $1, offset: $0 * MemoryLayout<Pointer>.size) })
+            }) ?? []
         })
     }
     
@@ -269,8 +266,8 @@ func ==(lhs: MemoryRegion, rhs: MemoryRegion) -> Bool {
 
 func buildMemoryRegionTree<T>(value: T, maxDepth: Int) -> [MemoryRegion] {
     var value = value
-    let maybeRootRegion = withUnsafePointer(&value, { ptr -> MemoryRegion? in
-        let memory = Memory(ptr: Pointer(ptr), knownSize: UInt(sizeof(T.self)))
+    let maybeRootRegion = withUnsafePointer(to: &value, { ptr -> MemoryRegion? in
+        let memory = Memory(ptr: Pointer(ptr), knownSize: UInt(MemoryLayout<T>.size))
         return memory.map({ MemoryRegion(depth: 1, pointer: Pointer(ptr), memory: $0) })
     })
     guard let rootRegion = maybeRootRegion else { return [] }
@@ -309,7 +306,7 @@ func dumpAndOpenGraph<T>(dumping value: T, maxDepth: Int, filename: String) {
     }
     
     func graphvizNodeName(region: MemoryRegion) -> String {
-        let s = String(region.pointer)
+        let s = String(describing: region.pointer)
         return "_" + s.substring(from: s.index(s.startIndex, offsetBy: 2))
     }
     
