@@ -264,12 +264,9 @@ func ==(lhs: MemoryRegion, rhs: MemoryRegion) -> Bool {
     return lhs.pointer == rhs.pointer
 }
 
-func buildMemoryRegionTree<T>(value: T, maxDepth: Int) -> [MemoryRegion] {
-    var value = value
-    let maybeRootRegion = withUnsafePointer(to: &value, { ptr -> MemoryRegion? in
-        let memory = Memory(ptr: Pointer(ptr), knownSize: UInt(MemoryLayout<T>.size))
-        return memory.map({ MemoryRegion(depth: 1, pointer: Pointer(ptr), memory: $0) })
-    })
+func buildMemoryRegionTree(ptr: UnsafeRawPointer, knownSize: UInt?, maxDepth: Int) -> [MemoryRegion] {
+    let memory = Memory(ptr: Pointer(ptr), knownSize: knownSize)
+    let maybeRootRegion = memory.map({ MemoryRegion(depth: 1, pointer: Pointer(ptr), memory: $0) })
     guard let rootRegion = maybeRootRegion else { return [] }
     
     var allRegions: [Pointer: MemoryRegion] = [rootRegion.pointer: rootRegion]
@@ -299,6 +296,11 @@ func buildMemoryRegionTree<T>(value: T, maxDepth: Int) -> [MemoryRegion] {
 }
 
 func dumpAndOpenGraph<T>(dumping value: T, maxDepth: Int, filename: String) {
+    var value = value
+    dumpAndOpenGraph(dumping: &value, knownSize: UInt(MemoryLayout<T>.size), maxDepth: maxDepth, filename: filename)
+}
+
+func dumpAndOpenGraph(dumping ptr: UnsafeRawPointer, knownSize: UInt, maxDepth: Int, filename: String) {
     var result = ""
     func line(_ string: String) {
         result += string
@@ -310,7 +312,7 @@ func dumpAndOpenGraph<T>(dumping value: T, maxDepth: Int, filename: String) {
         return "_" + s.substring(from: s.index(s.startIndex, offsetBy: 2))
     }
     
-    let regions = buildMemoryRegionTree(value: value, maxDepth: maxDepth)
+    let regions = buildMemoryRegionTree(ptr: ptr, knownSize: knownSize, maxDepth: maxDepth)
     
     line("digraph memory_dump_graph {")
     for region in regions {
@@ -418,6 +420,10 @@ func main() {
         var d = 0x6060606060606060
     }
     dumpAndOpenGraph(dumping: [StructSmallP(), StructBigP(), ClassP()] as [P], maxDepth: 4, filename: "ProtocolConformance")
+    
+    DumpCMemory({ (pointer: UnsafeRawPointer?, knownSize: Int, maxDepth: Int, name: UnsafePointer<Int8>?) in
+        dumpAndOpenGraph(dumping: pointer!, knownSize: UInt(knownSize), maxDepth: maxDepth, filename: String(cString: name!))
+    })
 }
 
 main()

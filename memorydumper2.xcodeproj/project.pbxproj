@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		C200F1721D2C84ED0005F1CA /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = C200F1711D2C84ED0005F1CA /* main.swift */; };
+		C23E99B51D72750F00D0E8DC /* CMemory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C23E99B31D72750F00D0E8DC /* CMemory.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -25,6 +26,9 @@
 /* Begin PBXFileReference section */
 		C200F16E1D2C84ED0005F1CA /* memorydumper2 */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = memorydumper2; sourceTree = BUILT_PRODUCTS_DIR; };
 		C200F1711D2C84ED0005F1CA /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		C23E99B21D72750F00D0E8DC /* memorydumper2-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "memorydumper2-Bridging-Header.h"; sourceTree = "<group>"; };
+		C23E99B31D72750F00D0E8DC /* CMemory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CMemory.cpp; sourceTree = "<group>"; };
+		C23E99B41D72750F00D0E8DC /* CMemory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CMemory.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,6 +62,9 @@
 			isa = PBXGroup;
 			children = (
 				C200F1711D2C84ED0005F1CA /* main.swift */,
+				C23E99B41D72750F00D0E8DC /* CMemory.h */,
+				C23E99B31D72750F00D0E8DC /* CMemory.cpp */,
+				C23E99B21D72750F00D0E8DC /* memorydumper2-Bridging-Header.h */,
 			);
 			path = memorydumper2;
 			sourceTree = "<group>";
@@ -96,6 +103,7 @@
 						CreatedOnToolsVersion = 8.0;
 						DevelopmentTeam = 44N4WJ59X4;
 						DevelopmentTeamName = "Michael Ash (Personal Team)";
+						LastSwiftMigration = 0800;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -122,6 +130,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C23E99B51D72750F00D0E8DC /* CMemory.cpp in Sources */,
 				C200F1721D2C84ED0005F1CA /* main.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -218,14 +227,23 @@
 		C200F1761D2C84ED0005F1CA /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "memorydumper2/memorydumper2-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
 		};
 		C200F1771D2C84ED0005F1CA /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "memorydumper2/memorydumper2-Bridging-Header.h";
+				SWIFT_VERSION = 3.0;
 			};
 			name = Release;
 		};
@@ -248,6 +266,7 @@
 				C200F1771D2C84ED0005F1CA /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
