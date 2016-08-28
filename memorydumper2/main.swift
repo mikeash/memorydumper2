@@ -75,9 +75,21 @@ func symbolLength(ptr: Pointer, limit: UInt) -> UInt? {
 }
 
 func demangle(_ string: String) -> String {
+    return demangleCpp(demangleSwift(string))
+}
+
+func demangleSwift(_ string: String) -> String {
+    return demangle(string, tool: ["swift-demangle"])
+}
+
+func demangleCpp(_ string: String) -> String {
+    return demangle(string, tool: ["c++filt", "-n"])
+}
+
+func demangle(_ string: String, tool: [String]) -> String {
     let task = Process()
     task.launchPath = "/usr/bin/xcrun"
-    task.arguments = ["swift-demangle"]
+    task.arguments = tool
     
     let inPipe = Pipe()
     let outPipe = Pipe()
