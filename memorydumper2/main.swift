@@ -355,9 +355,9 @@ func dumpAndOpenGraph(dumping ptr: UnsafeRawPointer, knownSize: UInt, maxDepth: 
         let memoryString = hexString(bytes: region.memory.buffer, limit: 64, separator: "\n")
         let labelName: String
         if let className = objcClassName(ptr: region.pointer) {
-            labelName = "ObjC class \(className)"
+            labelName = "ObjC class \(demangle(className))"
         } else if let className = objcInstanceClassName(ptr: region.pointer) {
-            labelName = "Instance of \(className)"
+            labelName = "Instance of \(demangle(className))"
         } else if let symbolName = region.memory.symbolName {
             labelName = symbolName
         } else if region.memory.isMalloc {
