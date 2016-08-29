@@ -396,111 +396,110 @@ func dumpAndOpenGraph<T>(dumping value: T, maxDepth: Int, filename: String) {
     dumpAndOpenGraph(dumping: &value, knownSize: UInt(MemoryLayout<T>.size), maxDepth: maxDepth, filename: filename)
 }
 
+
+// Dumping of sample objects follows from here.
+
 protocol P {
     func f()
     func g()
     func h()
 }
 
-func main() {
-    struct EmptyStruct {}
-    dumpAndOpenGraph(dumping: EmptyStruct(), maxDepth: 60, filename: "Empty struct")
-    
-    class EmptyClass {}
-    dumpAndOpenGraph(dumping: EmptyClass(), maxDepth: 60, filename: "Empty class")
-    
-    class EmptyObjCClass: NSObject {}
-    dumpAndOpenGraph(dumping: EmptyObjCClass(), maxDepth: 60, filename: "Empty ObjC Class")
-    
-    struct SimpleStruct {
-        var x: Int = 1
-        var y: Int = 2
-        var z: Int = 3
-    }
-    dumpAndOpenGraph(dumping: SimpleStruct(), maxDepth: 60, filename: "Simple struct")
-    
-    class SimpleClass {
-        var x: Int = 1
-        var y: Int = 2
-        var z: Int = 3
-    }
-    dumpAndOpenGraph(dumping: SimpleClass(), maxDepth: 60, filename: "Simple class")
-    
-    struct StructWithPadding {
-        var a: UInt8 = 1
-        var b: UInt8 = 2
-        var c: UInt8 = 3
-        var d: UInt16 = 4
-        var e: UInt8 = 5
-        var f: UInt32 = 6
-        var g: UInt8 = 7
-        var h: UInt64 = 8
-    }
-    dumpAndOpenGraph(dumping: StructWithPadding(), maxDepth: 60, filename: "Struct with padding")
-    
-    class ClassWithPadding {
-        var a: UInt8 = 1
-        var b: UInt8 = 2
-        var c: UInt8 = 3
-        var d: UInt16 = 4
-        var e: UInt8 = 5
-        var f: UInt32 = 6
-        var g: UInt8 = 7
-        var h: UInt64 = 8
-    }
-    dumpAndOpenGraph(dumping: ClassWithPadding(), maxDepth: 60, filename: "Class with padding")
-    
-    class DeepClassSuper1 {
-        var a = 1
-    }
-    class DeepClassSuper2: DeepClassSuper1 {
-        var b = 2
-    }
-    class DeepClassSuper3: DeepClassSuper2 {
-        var c = 3
-    }
-    class DeepClass: DeepClassSuper3 {
-        var d = 4
-    }
-    dumpAndOpenGraph(dumping: DeepClass(), maxDepth: 60, filename: "Deep class")
-    
-    dumpAndOpenGraph(dumping: [1, 2, 3, 4, 5], maxDepth: 4, filename: "Integer array")
-    
-    struct StructSmallP: P {
-        func f() {}
-        func g() {}
-        func h() {}
-        var a = 0x6c6c616d73
-    }
-    struct StructBigP: P {
-        func f() {}
-        func g() {}
-        func h() {}
-        var a = 0x746375727473
-        var b = 0x1010101010101010
-        var c = 0x2020202020202020
-        var d = 0x3030303030303030
-    }
-    struct ClassP: P {
-        func f() {}
-        func g() {}
-        func h() {}
-        var a = 0x7373616c63
-        var b = 0x4040404040404040
-        var c = 0x5050505050505050
-        var d = 0x6060606060606060
-    }
-    struct ProtocolHolder {
-        var a: P
-        var b: P
-        var c: P
-    }
-    let holder = ProtocolHolder(a: StructSmallP(), b: StructBigP(), c: ClassP())
-    dumpAndOpenGraph(dumping: holder, maxDepth: 4, filename: "Protocol types")
-    
-    DumpCMemory({ (pointer: UnsafeRawPointer?, knownSize: Int, maxDepth: Int, name: UnsafePointer<Int8>?) in
-        dumpAndOpenGraph(dumping: pointer!, knownSize: UInt(knownSize), maxDepth: maxDepth, filename: String(cString: name!))
-    })
-}
+struct EmptyStruct {}
+dumpAndOpenGraph(dumping: EmptyStruct(), maxDepth: 60, filename: "Empty struct")
 
-main()
+class EmptyClass {}
+dumpAndOpenGraph(dumping: EmptyClass(), maxDepth: 60, filename: "Empty class")
+
+class EmptyObjCClass: NSObject {}
+dumpAndOpenGraph(dumping: EmptyObjCClass(), maxDepth: 60, filename: "Empty ObjC Class")
+
+struct SimpleStruct {
+    var x: Int = 1
+    var y: Int = 2
+    var z: Int = 3
+}
+dumpAndOpenGraph(dumping: SimpleStruct(), maxDepth: 60, filename: "Simple struct")
+
+class SimpleClass {
+    var x: Int = 1
+    var y: Int = 2
+    var z: Int = 3
+}
+dumpAndOpenGraph(dumping: SimpleClass(), maxDepth: 60, filename: "Simple class")
+
+struct StructWithPadding {
+    var a: UInt8 = 1
+    var b: UInt8 = 2
+    var c: UInt8 = 3
+    var d: UInt16 = 4
+    var e: UInt8 = 5
+    var f: UInt32 = 6
+    var g: UInt8 = 7
+    var h: UInt64 = 8
+}
+dumpAndOpenGraph(dumping: StructWithPadding(), maxDepth: 60, filename: "Struct with padding")
+
+class ClassWithPadding {
+    var a: UInt8 = 1
+    var b: UInt8 = 2
+    var c: UInt8 = 3
+    var d: UInt16 = 4
+    var e: UInt8 = 5
+    var f: UInt32 = 6
+    var g: UInt8 = 7
+    var h: UInt64 = 8
+}
+dumpAndOpenGraph(dumping: ClassWithPadding(), maxDepth: 60, filename: "Class with padding")
+
+class DeepClassSuper1 {
+    var a = 1
+}
+class DeepClassSuper2: DeepClassSuper1 {
+    var b = 2
+}
+class DeepClassSuper3: DeepClassSuper2 {
+    var c = 3
+}
+class DeepClass: DeepClassSuper3 {
+    var d = 4
+}
+dumpAndOpenGraph(dumping: DeepClass(), maxDepth: 60, filename: "Deep class")
+
+dumpAndOpenGraph(dumping: [1, 2, 3, 4, 5], maxDepth: 4, filename: "Integer array")
+
+struct StructSmallP: P {
+    func f() {}
+    func g() {}
+    func h() {}
+    var a = 0x6c6c616d73
+}
+struct StructBigP: P {
+    func f() {}
+    func g() {}
+    func h() {}
+    var a = 0x746375727473
+    var b = 0x1010101010101010
+    var c = 0x2020202020202020
+    var d = 0x3030303030303030
+}
+struct ClassP: P {
+    func f() {}
+    func g() {}
+    func h() {}
+    var a = 0x7373616c63
+    var b = 0x4040404040404040
+    var c = 0x5050505050505050
+    var d = 0x6060606060606060
+}
+struct ProtocolHolder {
+    var a: P
+    var b: P
+    var c: P
+}
+let holder = ProtocolHolder(a: StructSmallP(), b: StructBigP(), c: ClassP())
+dumpAndOpenGraph(dumping: holder, maxDepth: 4, filename: "Protocol types")
+
+DumpCMemory({ (pointer: UnsafeRawPointer?, knownSize: Int, maxDepth: Int, name: UnsafePointer<Int8>?) in
+    dumpAndOpenGraph(dumping: pointer!, knownSize: UInt(knownSize), maxDepth: maxDepth, filename: String(cString: name!))
+})
