@@ -398,6 +398,8 @@ func dumpAndOpenGraph<T>(dumping value: T, maxDepth: Int, filename: String) {
 
 protocol P {
     func f()
+    func g()
+    func h()
 }
 
 func main() {
@@ -444,10 +446,14 @@ func main() {
     
     struct StructSmallP: P {
         func f() {}
+        func g() {}
+        func h() {}
         var a = 0x6c6c616d73
     }
     struct StructBigP: P {
         func f() {}
+        func g() {}
+        func h() {}
         var a = 0x746375727473
         var b = 0x1010101010101010
         var c = 0x2020202020202020
@@ -455,12 +461,20 @@ func main() {
     }
     struct ClassP: P {
         func f() {}
+        func g() {}
+        func h() {}
         var a = 0x7373616c63
         var b = 0x4040404040404040
         var c = 0x5050505050505050
         var d = 0x6060606060606060
     }
-    dumpAndOpenGraph(dumping: [StructSmallP(), StructBigP(), ClassP()] as [P], maxDepth: 4, filename: "ProtocolConformance")
+    struct ProtocolHolder {
+        var a: P
+        var b: P
+        var c: P
+    }
+    let holder = ProtocolHolder(a: StructSmallP(), b: StructBigP(), c: ClassP())
+    dumpAndOpenGraph(dumping: holder, maxDepth: 4, filename: "ProtocolConformance")
     
     DumpCMemory({ (pointer: UnsafeRawPointer?, knownSize: Int, maxDepth: Int, name: UnsafePointer<Int8>?) in
         dumpAndOpenGraph(dumping: pointer!, knownSize: UInt(knownSize), maxDepth: maxDepth, filename: String(cString: name!))
