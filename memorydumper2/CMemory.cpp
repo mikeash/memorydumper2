@@ -12,6 +12,19 @@ void DumpCMemory(void (^dump)(const void *ptr, size_t knownSize, long maxDepth, 
     S s = { 1, 2, 3 };
     dump(&s, sizeof(s), 10, "Simple C struct");
     
+    struct WithPadding {
+        char a;
+        char b;
+        char c;
+        short d;
+        char e;
+        int f;
+        char g;
+        long h;
+    };
+    WithPadding withPadding = { 1, 2, 3, 4, 5, 6, 7, 8 };
+    dump(&withPadding, sizeof(withPadding), 10, "C struct with padding");
+    
     class SimpleClass {
     public:
         long x;
