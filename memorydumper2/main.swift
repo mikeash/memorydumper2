@@ -404,13 +404,13 @@ protocol P {
 
 func main() {
     struct EmptyStruct {}
-    dumpAndOpenGraph(dumping: EmptyStruct(), maxDepth: 60, filename: "EmptyStruct")
+    dumpAndOpenGraph(dumping: EmptyStruct(), maxDepth: 60, filename: "Empty struct")
     
     class EmptyClass {}
-    dumpAndOpenGraph(dumping: EmptyClass(), maxDepth: 60, filename: "EmptyClass")
+    dumpAndOpenGraph(dumping: EmptyClass(), maxDepth: 60, filename: "Empty class")
     
     class EmptyObjCClass: NSObject {}
-    dumpAndOpenGraph(dumping: EmptyObjCClass(), maxDepth: 60, filename: "EmptyObjCClass")
+    dumpAndOpenGraph(dumping: EmptyObjCClass(), maxDepth: 60, filename: "Empty ObjC Class")
     
     struct PrimitivesStruct {
         var a: UInt8 = 10
@@ -418,7 +418,7 @@ func main() {
         var c: UInt16 = 12
         var d: UInt64 = 13
     }
-    dumpAndOpenGraph(dumping: PrimitivesStruct(), maxDepth: 60, filename: "PrimitivesStruct")
+    dumpAndOpenGraph(dumping: PrimitivesStruct(), maxDepth: 60, filename: "Primitives struct")
     
     class PrimitivesClass {
         var a: UInt8 = 10
@@ -426,7 +426,7 @@ func main() {
         var c: UInt16 = 12
         var d: UInt64 = 13
     }
-    dumpAndOpenGraph(dumping: PrimitivesClass(), maxDepth: 60, filename: "PrimitivesClass")
+    dumpAndOpenGraph(dumping: PrimitivesClass(), maxDepth: 60, filename: "Primitives class")
     
     class DeepClassSuper1 {
         var a = 1
@@ -440,9 +440,9 @@ func main() {
     class DeepClass: DeepClassSuper3 {
         var d = 4
     }
-    dumpAndOpenGraph(dumping: DeepClass(), maxDepth: 60, filename: "DeepClass")
+    dumpAndOpenGraph(dumping: DeepClass(), maxDepth: 60, filename: "Deep class")
     
-    dumpAndOpenGraph(dumping: [1, 2, 3, 4, 5], maxDepth: 4, filename: "IntegerArray")
+    dumpAndOpenGraph(dumping: [1, 2, 3, 4, 5], maxDepth: 4, filename: "Integer array")
     
     struct StructSmallP: P {
         func f() {}
@@ -474,7 +474,7 @@ func main() {
         var c: P
     }
     let holder = ProtocolHolder(a: StructSmallP(), b: StructBigP(), c: ClassP())
-    dumpAndOpenGraph(dumping: holder, maxDepth: 4, filename: "ProtocolConformance")
+    dumpAndOpenGraph(dumping: holder, maxDepth: 4, filename: "Protocol types")
     
     DumpCMemory({ (pointer: UnsafeRawPointer?, knownSize: Int, maxDepth: Int, name: UnsafePointer<Int8>?) in
         dumpAndOpenGraph(dumping: pointer!, knownSize: UInt(knownSize), maxDepth: maxDepth, filename: String(cString: name!))
