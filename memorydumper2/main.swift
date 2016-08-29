@@ -307,12 +307,36 @@ func buildMemoryRegionTree(ptr: UnsafeRawPointer, knownSize: UInt?, maxDepth: In
     return Array(allRegions.values)
 }
 
-func dumpAndOpenGraph<T>(dumping value: T, maxDepth: Int, filename: String) {
-    var value = value
-    dumpAndOpenGraph(dumping: &value, knownSize: UInt(MemoryLayout<T>.size), maxDepth: maxDepth, filename: filename)
+enum DumpOptions {
+    case all
+    case some(Set<String>)
+    case getAvailable((String) -> Void)
+    
+    static let processOptions: DumpOptions = {
+        let parameters = CommandLine.arguments.dropFirst()
+        if parameters.count == 0 {
+            print("Available dumps are listed here. Pass the desired dumps as arguments, or pass \"all\" to dump all available:")
+            return .getAvailable({ print($0) })
+        } else if parameters == ["all"] {
+            return .all
+        } else {
+            return .some(Set(parameters))
+        }
+    }()
 }
 
 func dumpAndOpenGraph(dumping ptr: UnsafeRawPointer, knownSize: UInt, maxDepth: Int, filename: String) {
+    switch DumpOptions.processOptions {
+    case .all:
+        break
+    case .some(let selected):
+        if !selected.contains(filename) {
+            return
+        }
+    case .getAvailable(let callback):
+        callback(filename)
+        return
+    }
     var result = ""
     func line(_ string: String) {
         result += string
@@ -365,6 +389,11 @@ func dumpAndOpenGraph(dumping ptr: UnsafeRawPointer, knownSize: UInt, maxDepth: 
     let path = "/tmp/\(filename).dot"
     try! result.write(toFile: path, atomically: false, encoding: .utf8)
     NSWorkspace.shared().openFile(path, withApplication: "Graphviz")
+}
+
+func dumpAndOpenGraph<T>(dumping value: T, maxDepth: Int, filename: String) {
+    var value = value
+    dumpAndOpenGraph(dumping: &value, knownSize: UInt(MemoryLayout<T>.size), maxDepth: maxDepth, filename: filename)
 }
 
 protocol P {
