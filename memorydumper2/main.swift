@@ -351,6 +351,7 @@ func dumpAndOpenGraph(dumping ptr: UnsafeRawPointer, knownSize: UInt, maxDepth: 
     let regions = buildMemoryRegionTree(ptr: ptr, knownSize: knownSize, maxDepth: maxDepth)
     
     line("digraph memory_dump_graph {")
+    line("graph [bgcolor=black]")
     for region in regions {
         let memoryString = hexString(bytes: region.memory.buffer, limit: 64, separator: "\n")
         let labelName: String
@@ -378,10 +379,10 @@ func dumpAndOpenGraph(dumping ptr: UnsafeRawPointer, knownSize: UInt, maxDepth: 
             .replacingOccurrences(of: "\\", with: "\\\\")
             .replacingOccurrences(of: "\"", with: "\\\"")
         
-        line("\(graphvizNodeName(region: region)) [label=\"\(escaped)\"]")
+        line("\(graphvizNodeName(region: region)) [style=filled] [fillcolor=white] [label=\"\(escaped)\"]")
         
         for child in region.children {
-            line("\(graphvizNodeName(region: region)) -> \(graphvizNodeName(region: child.region)) [label=\"@\(child.offset)\"]")
+            line("\(graphvizNodeName(region: region)) -> \(graphvizNodeName(region: child.region)) [color=white] [fontcolor=white] [label=\"@\(child.offset)\"]")
         }
     }
     line("}")
