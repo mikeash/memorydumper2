@@ -412,21 +412,43 @@ func main() {
     class EmptyObjCClass: NSObject {}
     dumpAndOpenGraph(dumping: EmptyObjCClass(), maxDepth: 60, filename: "Empty ObjC Class")
     
-    struct PrimitivesStruct {
-        var a: UInt8 = 10
-        var b: UInt32 = 11
-        var c: UInt16 = 12
-        var d: UInt64 = 13
+    struct SimpleStruct {
+        var x: Int = 1
+        var y: Int = 2
+        var z: Int = 3
     }
-    dumpAndOpenGraph(dumping: PrimitivesStruct(), maxDepth: 60, filename: "Primitives struct")
+    dumpAndOpenGraph(dumping: SimpleStruct(), maxDepth: 60, filename: "Simple struct")
     
-    class PrimitivesClass {
-        var a: UInt8 = 10
-        var b: UInt32 = 11
-        var c: UInt16 = 12
-        var d: UInt64 = 13
+    class SimpleClass {
+        var x: Int = 1
+        var y: Int = 2
+        var z: Int = 3
     }
-    dumpAndOpenGraph(dumping: PrimitivesClass(), maxDepth: 60, filename: "Primitives class")
+    dumpAndOpenGraph(dumping: SimpleClass(), maxDepth: 60, filename: "Simple class")
+    
+    struct StructWithPadding {
+        var a: UInt8 = 1
+        var b: UInt8 = 2
+        var c: UInt8 = 3
+        var d: UInt16 = 4
+        var e: UInt8 = 5
+        var f: UInt32 = 6
+        var g: UInt8 = 7
+        var h: UInt64 = 8
+    }
+    dumpAndOpenGraph(dumping: StructWithPadding(), maxDepth: 60, filename: "Struct with padding")
+    
+    class ClassWithPadding {
+        var a: UInt8 = 1
+        var b: UInt8 = 2
+        var c: UInt8 = 3
+        var d: UInt16 = 4
+        var e: UInt8 = 5
+        var f: UInt32 = 6
+        var g: UInt8 = 7
+        var h: UInt64 = 8
+    }
+    dumpAndOpenGraph(dumping: ClassWithPadding(), maxDepth: 60, filename: "Class with padding")
     
     class DeepClassSuper1 {
         var a = 1
