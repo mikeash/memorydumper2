@@ -319,6 +319,13 @@ enum DumpOptions {
             return .getAvailable({ print($0) })
         } else if parameters == ["all"] {
             return .all
+        } else if parameters == ["prompt"] {
+            print("Enter the dump to run:")
+            guard let line = readLine() else {
+                print("You must enter something. Available dumps:")
+                return .getAvailable({ print($0) })
+            }
+            return .some([line])
         } else {
             return .some(Set(parameters))
         }
