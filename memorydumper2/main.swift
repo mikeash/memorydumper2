@@ -332,7 +332,7 @@ enum DumpOptions {
     }()
 }
 
-func dumpAndOpenGraph(dumping ptr: UnsafeRawPointer, knownSize: UInt, maxDepth: Int, filename: String) {
+func dumpAndOpenGraph(dumping ptr: UnsafeRawPointer, knownSize: UInt?, maxDepth: Int, filename: String) {
     switch DumpOptions.processOptions {
     case .all:
         break
@@ -402,6 +402,10 @@ func dumpAndOpenGraph(dumping ptr: UnsafeRawPointer, knownSize: UInt, maxDepth: 
 func dumpAndOpenGraph<T>(dumping value: T, maxDepth: Int, filename: String) {
     var value = value
     dumpAndOpenGraph(dumping: &value, knownSize: UInt(MemoryLayout<T>.size), maxDepth: maxDepth, filename: filename)
+}
+
+func dumpAndOpenGraph(dumping object: AnyObject, maxDepth: Int, filename: String) {
+    dumpAndOpenGraph(dumping: unsafeBitCast(object, to: UnsafeRawPointer.self), knownSize: nil, maxDepth: maxDepth, filename: filename)
 }
 
 
