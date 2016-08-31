@@ -91,19 +91,21 @@ void DumpCMemory(void (^dump)(const void *ptr, size_t knownSize, long maxDepth, 
     
     class SecondSuperclass {
     public:
-        long z;
+        long y;
         
         virtual void k() {}
         virtual void l() {}
     };
     
-    class MultipleInheritanceSubclass: public SimpleClass, SecondSuperclass {
+    class MultipleInheritanceSubclass: public SimpleClass, public SecondSuperclass {
     public:
-        long a;
+        long z;
     };
     
     MultipleInheritanceSubclass multipleInheritanceSubclass;
     multipleInheritanceSubclass.x = 1;
-    multipleInheritanceSubclass.a = 2;
+    multipleInheritanceSubclass.y = 2;
+    multipleInheritanceSubclass.z = 3;
+    
     dump(&multipleInheritanceSubclass, sizeof(multipleInheritanceSubclass), 10, "C++ subclass with two superclasses");
 }
