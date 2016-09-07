@@ -325,7 +325,7 @@ enum DumpOptions {
                 print("You must enter something. Available dumps:")
                 return .getAvailable({ print($0) })
             }
-            return .some([line])
+            return line == "all" ? .all : .some([line])
         } else {
             return .some(Set(parameters))
         }
