@@ -490,7 +490,7 @@ struct StructBigP: P {
     func f() {}
     func g() {}
     func h() {}
-    var a = 0x746375727473
+    var a = 0x656772616c
     var b = 0x1010101010101010
     var c = 0x2020202020202020
     var d = 0x3030303030303030
