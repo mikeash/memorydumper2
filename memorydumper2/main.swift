@@ -438,7 +438,7 @@ class SimpleClass {
     var y: Int = 2
     var z: Int = 3
 }
-dumpAndOpenGraph(dumping: SimpleClass(), maxDepth: 60, filename: "Simple class")
+dumpAndOpenGraph(dumping: SimpleClass(), maxDepth: 6, filename: "Simple class")
 
 struct StructWithPadding {
     var a: UInt8 = 1
