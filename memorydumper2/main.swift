@@ -512,6 +512,71 @@ struct ProtocolHolder {
 let holder = ProtocolHolder(a: StructSmallP(), b: StructBigP(), c: ClassP())
 dumpAndOpenGraph(dumping: holder, maxDepth: 4, filename: "Protocol types")
 
+enum SimpleEnum {
+    case A, B, C, D, E
+}
+struct SimpleEnumHolder {
+    var a: SimpleEnum
+    var b: SimpleEnum
+    var c: SimpleEnum
+    var d: SimpleEnum
+    var e: SimpleEnum
+}
+dumpAndOpenGraph(dumping: SimpleEnumHolder(a: .A, b: .B, c: .C, d: .D, e: .E), maxDepth: 5, filename: "Simple enum")
+
+enum IntRawValueEnum: Int {
+    case A = 1, B, C, D, E
+}
+struct IntRawValueEnumHolder {
+    var a: IntRawValueEnum
+    var b: IntRawValueEnum
+    var c: IntRawValueEnum
+    var d: IntRawValueEnum
+    var e: IntRawValueEnum
+}
+dumpAndOpenGraph(dumping: IntRawValueEnumHolder(a: .A, b: .B, c: .C, d: .D, e: .E), maxDepth: 5, filename: "Int raw value enum")
+
+enum StringRawValueEnum: String {
+    case A = "whatever", B, C, D, E
+}
+struct StringRawValueEnumHolder {
+    var a: StringRawValueEnum
+    var b: StringRawValueEnum
+    var c: StringRawValueEnum
+    var d: StringRawValueEnum
+    var e: StringRawValueEnum
+}
+dumpAndOpenGraph(dumping: StringRawValueEnumHolder(a: .A, b: .B, c: .C, d: .D, e: .E), maxDepth: 5, filename: "String raw value enum")
+
+enum OneAssociatedObjectEnum {
+    case A(AnyObject)
+    case B, C, D, E
+}
+struct OneAssociatedObjectEnumHolder {
+    var a: OneAssociatedObjectEnum
+    var b: OneAssociatedObjectEnum
+    var c: OneAssociatedObjectEnum
+    var d: OneAssociatedObjectEnum
+    var e: OneAssociatedObjectEnum
+}
+dumpAndOpenGraph(dumping: OneAssociatedObjectEnumHolder(a: .A(NSObject()), b: .B, c: .C, d: .D, e: .E), maxDepth: 5, filename: "One associated object enum")
+
+enum ManyAssociatedObjectsEnum {
+    case A(AnyObject)
+    case B(AnyObject)
+    case C(AnyObject)
+    case D(AnyObject)
+    case E(AnyObject)
+}
+struct ManyAssociatedObjectsEnumHolder {
+    var a: ManyAssociatedObjectsEnum
+    var b: ManyAssociatedObjectsEnum
+    var c: ManyAssociatedObjectsEnum
+    var d: ManyAssociatedObjectsEnum
+    var e: ManyAssociatedObjectsEnum
+}
+dumpAndOpenGraph(dumping: ManyAssociatedObjectsEnumHolder(a: .A(NSObject()), b: .B(NSObject()), c: .C(NSObject()), d: .D(NSObject()), e: .E(NSObject())), maxDepth: 5, filename: "Many associated objects enum")
+
 DumpCMemory({ (pointer: UnsafeRawPointer?, knownSize: Int, maxDepth: Int, name: UnsafePointer<Int8>?) in
     dumpAndOpenGraph(dumping: pointer!, knownSize: UInt(knownSize), maxDepth: maxDepth, filename: String(cString: name!))
 })
