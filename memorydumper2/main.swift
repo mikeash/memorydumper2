@@ -165,7 +165,7 @@ func objcClassName(ptr: Pointer) -> String? {
             
             var map: [Pointer: AnyClass] = [:]
             for i in 0 ..< classCount {
-                let classObj: AnyClass = list[Int(i)]!
+                let classObj: AnyClass = list[Int(i)]
                 let classPtr = unsafeBitCast(classObj, to: Pointer.self)
                 map[classPtr] = classObj
             }
@@ -352,7 +352,7 @@ func dumpAndOpenGraph(dumping ptr: UnsafeRawPointer, knownSize: UInt?, maxDepth:
     
     func graphvizNodeName(region: MemoryRegion) -> String {
         let s = String(describing: region.pointer)
-        return "_" + s.substring(from: s.index(s.startIndex, offsetBy: 2))
+        return "_" + s[ s.index(s.startIndex, offsetBy: 2)...]
     }
     
     let regions = buildMemoryRegionTree(ptr: ptr, knownSize: knownSize, maxDepth: maxDepth)
@@ -396,7 +396,7 @@ func dumpAndOpenGraph(dumping ptr: UnsafeRawPointer, knownSize: UInt?, maxDepth:
     
     let path = "/tmp/\(filename).dot"
     try! result.write(toFile: path, atomically: false, encoding: .utf8)
-    NSWorkspace.shared().openFile(path, withApplication: "Graphviz")
+    NSWorkspace.shared.openFile(path, withApplication: "Graphviz")
 }
 
 func dumpAndOpenGraph<T>(dumping value: T, maxDepth: Int, filename: String) {
