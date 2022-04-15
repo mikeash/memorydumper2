@@ -160,14 +160,14 @@ func hexString<Seq: Sequence>(bytes: Seq, limit: Int? = nil, separator: String =
 func objcClassName(ptr: Pointer) -> String? {
     struct Static {
         static let classMap: [Pointer: AnyClass] = {
-            var classCount: UInt32 = 0
-            let list = objc_copyClassList(&classCount)!
-            
+            var count: UInt32 = 0
+            let classList = objc_copyClassList(&count)!
             var map: [Pointer: AnyClass] = [:]
-            for i in 0 ..< classCount {
-                let classObj: AnyClass = list[Int(i)]
-                let classPtr = unsafeBitCast(classObj, to: Pointer.self)
-                map[classPtr] = classObj
+            defer { free(UnsafeMutableRawPointer(classList)) }
+            let classes = UnsafeBufferPointer(start: classList, count: Int(count))
+            for cls in classes {
+                let classPtr = unsafeBitCast(cls, to: Pointer.self)
+                map[classPtr] = cls
             }
             return map
         }()
